@@ -1,0 +1,23 @@
+# Environment Variables & Secrets
+.env
+token.json
+credentials.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+.python-version
+
+# Logs
+*.log
+launchd.log
+cron.log
+
+# System
+.DS_Store
+
+# Brain/Artifacts (if inside project, which it's not, but good practice)
+brain/
