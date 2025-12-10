@@ -1,8 +1,8 @@
 #!/bin/bash
 # Newsletter Agent Cron Wrapper
 
-# Navigate to the project directory so relative paths (token.json, .env) work
-cd /Users/ben/.gemini/antigravity/scratch/agent_project
+# Navigate to the directory where this script resides
+cd "$(dirname "$0")"
 
 # Log start time
 echo "Starting Newsletter Agent at $(date)" >> cron.log

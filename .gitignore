@@ -21,3 +21,4 @@ cron.log
 
 # Brain/Artifacts (if inside project, which it's not, but good practice)
 brain/
+com.ben.newsletter_agent.plist
