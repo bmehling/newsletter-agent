@@ -2,6 +2,8 @@
 
 An AI-powered agent that monitors your Gmail for newsletters, extracts key insights using Google Gemini, and compiles them into a Notion database and Daily Summary page.
 
+NOTE: This agent was built via AI. Design brainstorm and PRD via Claude Sonnet. Code, testing, and utilities via Gemini/Antigravity.
+
 ## Features
 -   **Automated Search**: Scans Gmail for newsletters based on your filters.
 -   **AI Extraction**: Uses Gemini Flash to extract summaries, key takeaways, and categories from emails.
