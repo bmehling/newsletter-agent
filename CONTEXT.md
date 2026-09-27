@@ -25,7 +25,7 @@ An Article the Newsletter marks as sponsored or advertising. It never appears in
 _Avoid_: Ad, sponsor slot
 
 **Interest Profile**:
-The Operator's topics and priorities, used to decide which Articles matter to them.
+The Operator's own written description of their topics and priorities, used to decide which Articles matter to them. Only the Operator changes it.
 _Avoid_: Preferences, focus, settings
 
 ### Audio
