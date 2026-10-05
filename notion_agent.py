@@ -2,6 +2,7 @@ import os
 from notion_client import Client
 from dotenv import load_dotenv
 from datetime import datetime
+from retry_util import with_retry
 
 load_dotenv()
 
@@ -43,10 +44,13 @@ class NotionAgent:
                     "bulleted_list_item": {"rich_text": [{"text": {"content": takeaway}}]}
                 })
 
-            response = self.notion.pages.create(
-                parent={"database_id": self.articles_db_id},
-                properties=properties,
-                children=children
+            response = with_retry(
+                lambda: self.notion.pages.create(
+                    parent={"database_id": self.articles_db_id},
+                    properties=properties,
+                    children=children
+                ),
+                label="Notion article create"
             )
             return response["id"] # Return ID to link in summary
         except Exception as e:
@@ -55,7 +59,7 @@ class NotionAgent:
 
     def create_daily_summary(self, processed_newsletters):
         """
-        Creates a daily summary page.
+        Creates a daily summary page. Returns True on success, False on failure.
         processed_newsletters: List of dicts, each containing 'name', 'subject', 'articles' (list of article dicts)
         """
         today_str = datetime.now().strftime("%B %d, %Y")
@@ -159,10 +163,13 @@ class NotionAgent:
 
         try:
             # Create page with first chunk
-            response = self.notion.pages.create(
-                parent={"database_id": self.summary_db_id},
-                properties=properties,
-                children=first_chunk
+            response = with_retry(
+                lambda: self.notion.pages.create(
+                    parent={"database_id": self.summary_db_id},
+                    properties=properties,
+                    children=first_chunk
+                ),
+                label="Notion summary create"
             )
             page_id = response["id"]
             print(f"Created Daily Summary page: {title}")
@@ -170,13 +177,18 @@ class NotionAgent:
             # Append remaining chunks
             for i, chunk in enumerate(remaining_chunks):
                 print(f"Appending chunk {i+1} of {len(remaining_chunks)}...")
-                self.notion.blocks.children.append(
-                    block_id=page_id,
-                    children=chunk
+                with_retry(
+                    lambda chunk=chunk: self.notion.blocks.children.append(
+                        block_id=page_id,
+                        children=chunk
+                    ),
+                    label="Notion summary append"
                 )
-            
+            return True
+
         except Exception as e:
             print(f"Error creating daily summary: {e}")
+            return False
 
 if __name__ == "__main__":
     # Test

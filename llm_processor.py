@@ -2,6 +2,7 @@ import os
 import json
 import google.generativeai as genai
 from dotenv import load_dotenv
+from retry_util import with_retry
 
 load_dotenv()
 
@@ -56,7 +57,12 @@ class LLMProcessor:
         """
 
         try:
-            response = self.model.generate_content(prompt)
+            response = with_retry(
+                lambda: self.model.generate_content(prompt, request_options={"timeout": 120}),
+                attempts=3,
+                base_delay=5,
+                label="Gemini call"
+            )
             text = response.text.strip()
             
             # Clean up markdown code blocks if present

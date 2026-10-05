@@ -36,6 +36,7 @@ def main():
     print(f"Found {len(messages)} newsletters to process.")
     
     processed_newsletters = []
+    processed_msg_ids = []
 
     # 3. Process Each Newsletter
     for msg in messages:
@@ -57,20 +58,27 @@ def main():
             print(f"  - Extracted {len(articles)} articles.")
             
             # Create Notion Entries for Articles
+            failed = 0
             for article in articles:
                 notion_id = notion.create_article_entry(article)
                 article['notion_id'] = notion_id
-                print(f"    - Created article: {article['title']}")
-            
-            # Add to list for Daily Summary
+                if notion_id:
+                    print(f"    - Created article: {article['title']}")
+                else:
+                    failed += 1
+                    print(f"    - FAILED article: {article['title']}")
+
+            if failed:
+                print(f"  - {failed} article(s) failed. Leaving email unlabeled for retry.")
+                continue
+
+            # Add to list for Daily Summary. Label only after the summary succeeds.
             processed_newsletters.append({
                 "name": sender_name,
                 "subject": details['subject'],
                 "articles": articles
             })
-            
-            # Mark as Processed
-            gmail.add_label(msg['id'], "Agent/newsletter processed")
+            processed_msg_ids.append(msg['id'])
             
         except Exception as e:
             print(f"Error processing message {msg['id']}: {e}")
@@ -78,8 +86,12 @@ def main():
     # 4. Create Daily Summary
     if processed_newsletters:
         print("Creating Daily Summary Page...")
-        notion.create_daily_summary(processed_newsletters)
-        print("Done!")
+        if notion.create_daily_summary(processed_newsletters):
+            for msg_id in processed_msg_ids:
+                gmail.add_label(msg_id, "Agent/newsletter processed")
+            print("Done!")
+        else:
+            print("Daily Summary failed. Emails left unlabeled so the next run retries them.")
     else:
         print("No newsletters were successfully processed.")
 
